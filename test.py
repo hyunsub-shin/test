@@ -1,34 +1,14 @@
-import socket, struct, time, random
-from PIL import Image, ImageOps
-from io import BytesIO
+import socket
 
-TCP_IP = '192.168.137.6'
-TCP_PORT = 8319
+print(socket.gethostbyname(socket.getfqdn()))			#1-1
+print(socket.gethostbyname(socket.gethostname()))		#1-2
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((TCP_IP, TCP_PORT))
+print(socket.gethostbyname_ex(socket.getfqdn()))		#2
 
-def clearScreen(color, apply=True):
-    header = struct.pack('<BBHHHH', 1, color, 0, 0, 1448, 1072)
-    s.sendall(header)
-    if apply:
-        header = struct.pack('<BBHHHH', 4, 0, 0, 0, 1448, 1072)
-        s.sendall(header)
-
-def drawImage(posx, posy, origImage):
-    grayImage = ImageOps.grayscale(origImage)
-    width, height = grayImage.size
-    pixels = grayImage.load()
-    image = bytearray()
-    for y in range(height):
-        for x in range(0, width, 2):
-            byt = (pixels[x,y] // 17) + ((pixels[x+1,y] // 17) << 4)
-            image.append(byt)
-    header = struct.pack('<BBHHHH', 2, 15, posx, posy, width, height)
-    s.sendall(header)
-    s.sendall(image)
-    header = struct.pack('<BBHHHH', 4, 0, posx, posy, width, height)
-    s.sendall(header)
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)	#3
+s.connect(('8.8.8.8', 0))
+ip = s.getsockname()[0]
+print(ip)
 
 
 clearScreen(15)
